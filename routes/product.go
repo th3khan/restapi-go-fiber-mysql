@@ -78,3 +78,43 @@ func GetProduct(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(CreateResponseProduct(product))
 }
+
+func UpdateProduct(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	var product models.Product
+
+	if err := FindProduct(id, &product); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	type UpdateProduct struct {
+		Name         string  `json:"name"`
+		Price        float64 `json:"price"`
+		SerialNumber string  `json:"serial_number"`
+	}
+
+	var updateProduct UpdateProduct
+
+	if err := c.BodyParser(&updateProduct); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	product.Name = updateProduct.Name
+	product.Price = updateProduct.Price
+	product.SerialNumber = updateProduct.SerialNumber
+
+	database.Database.Db.Save(&product)
+
+	return c.Status(fiber.StatusOK).JSON(CreateResponseProduct(product))
+}
