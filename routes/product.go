@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/th3khan/restapi-go-fiber-mysql/database"
 	"github.com/th3khan/restapi-go-fiber-mysql/models"
@@ -47,4 +49,32 @@ func CreateProduct(c *fiber.Ctx) error {
 	responseProduct := CreateResponseProduct(product)
 
 	return c.Status(fiber.StatusCreated).JSON(responseProduct)
+}
+
+func FindProduct(id int, product *models.Product) error {
+	database.Database.Db.Find(&product, "id = ?", id)
+	if product.ID == 0 {
+		return errors.New("Product not found")
+	}
+	return nil
+}
+
+func GetProduct(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	var product models.Product
+
+	if err := FindProduct(id, &product); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(CreateResponseProduct(product))
 }
