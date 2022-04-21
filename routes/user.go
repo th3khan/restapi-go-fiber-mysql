@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/th3khan/restapi-go-fiber-mysql/database"
 	"github.com/th3khan/restapi-go-fiber-mysql/models"
@@ -34,4 +36,45 @@ func CreateUser(c *fiber.Ctx) error {
 	responseUser := CreateResponseUser(user)
 
 	return c.Status(fiber.StatusCreated).JSON(responseUser)
+}
+
+func GetUsers(c *fiber.Ctx) error {
+	users := []models.User{}
+
+	database.Database.Db.Find(&users)
+	responseUsers := []UserSerializer{}
+
+	for _, user := range users {
+		responseUsers = append(responseUsers, CreateResponseUser(user))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(responseUsers)
+}
+
+func FindUser(id int, user *models.User) error {
+	database.Database.Db.Find(&user, "id = ?", id)
+	if user.ID == 0 {
+		return errors.New("User not found")
+	}
+	return nil
+}
+
+func GetUser(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	var user models.User
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if err := FindUser(id, &user); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(CreateResponseUser(user))
 }
