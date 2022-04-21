@@ -5,17 +5,26 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/th3khan/restapi-go-fiber-mysql/database"
+	"github.com/th3khan/restapi-go-fiber-mysql/routes"
 )
 
 func helloWorld(c *fiber.Ctx) error {
 	return c.SendString("Hello, World!")
 }
 
+func setupRoutes(app *fiber.App) {
+	// hello world
+	app.Get("/", helloWorld)
+
+	// user
+	app.Post("/users", routes.CreateUser)
+}
+
 func main() {
 	database.ConnectionDb()
 	app := fiber.New()
 
-	app.Get("/", helloWorld)
+	setupRoutes(app)
 
 	log.Fatal(app.Listen(":3000"))
 }
