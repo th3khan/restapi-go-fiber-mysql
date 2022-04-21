@@ -118,3 +118,27 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(CreateResponseProduct(product))
 }
+
+func DeleteProduct(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	var product models.Product
+
+	if err := FindProduct(id, &product); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	database.Database.Db.Delete(&product)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Product deleted",
+	})
+}
