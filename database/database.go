@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/th3khan/restapi-go-fiber-mysql/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -27,6 +28,7 @@ func ConnectionDb() {
 	db.Logger = logger.Default.LogMode(logger.Info)
 	log.Println("Running Migrations...")
 	// TODO: Add migrations
+	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Order{})
 
 	Database = DbInstance{Db: db}
 }

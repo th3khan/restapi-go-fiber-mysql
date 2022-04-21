@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/th3khan/restapi-go-fiber-mysql/database"
 )
 
 func helloWorld(c *fiber.Ctx) error {
@@ -11,6 +12,7 @@ func helloWorld(c *fiber.Ctx) error {
 }
 
 func main() {
+	database.ConnectionDb()
 	app := fiber.New()
 
 	app.Get("/", helloWorld)
