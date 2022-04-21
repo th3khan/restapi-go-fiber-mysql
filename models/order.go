@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Order struct {
-	Id        uint      `json:"id" gorm:"primary_key"`
+	ID        uint      `json:"id" gorm:"primary_key"`
 	ProductId int       `json:"product_id"`
 	Product   Product   `gorm:"foreignkey:ProductId"`
 	UserId    int       `json:"user_id"`
