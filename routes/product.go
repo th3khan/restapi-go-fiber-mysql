@@ -34,3 +34,17 @@ func GetProducts(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(responseProducts)
 }
+
+func CreateProduct(c *fiber.Ctx) error {
+	var product models.Product
+	if err := c.BodyParser(&product); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	database.Database.Db.Create(&product)
+	responseProduct := CreateResponseProduct(product)
+
+	return c.Status(fiber.StatusCreated).JSON(responseProduct)
+}
