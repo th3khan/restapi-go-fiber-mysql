@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -75,4 +76,37 @@ func GetOrders(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(responseOrder)
+}
+
+func FindOrder(id int, order *models.Order) error {
+	database.Database.Db.Find(order, "id = ?", id)
+	if order.ID == 0 {
+		return errors.New("Order not found")
+	}
+	return nil
+}
+
+func GetOrder(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	var order models.Order
+	if err := FindOrder(id, &order); err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	var user models.User
+	var product models.Product
+
+	database.Database.Db.First(&user, "id = ?", order.UserId)
+	database.Database.Db.First(&product, "id = ?", order.ProductId)
+
+	return c.Status(fiber.StatusOK).JSON(CreateOrderResponse(order, CreateResponseUser(user), CreateResponseProduct(product)))
 }
