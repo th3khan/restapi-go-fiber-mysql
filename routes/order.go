@@ -59,3 +59,20 @@ func CreateOrder(c *fiber.Ctx) error {
 
 	return c.Status(201).JSON(CreateOrderResponse(order, CreateResponseUser(user), CreateResponseProduct(product)))
 }
+
+func GetOrders(c *fiber.Ctx) error {
+	orders := []models.Order{}
+	database.Database.Db.Find(&orders)
+	responseOrder := []OrderSerializer{}
+
+	for _, order := range orders {
+		var user models.User
+		database.Database.Db.Find(&user, "id = ?", order.UserId)
+		var product models.Product
+		database.Database.Db.Find(&product, "id = ?", order.ProductId)
+
+		responseOrder = append(responseOrder, CreateOrderResponse(order, CreateResponseUser(user), CreateResponseProduct(product)))
+	}
+
+	return c.Status(fiber.StatusOK).JSON(responseOrder)
+}

@@ -32,6 +32,7 @@ func setupRoutes(app *fiber.App) {
 
 	// order
 	app.Post("/orders", routes.CreateOrder)
+	app.Get("/orders", routes.GetOrders)
 }
 
 func main() {
